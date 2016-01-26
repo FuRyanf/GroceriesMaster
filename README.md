@@ -13,4 +13,5 @@ chmod u+x NewGroceries.py
 ./NewGroceries.py yourSpreadsheat.xls
 
 **How to use**
+
 Follow the format in the sample spreadsheat in *groceries.xls*.
