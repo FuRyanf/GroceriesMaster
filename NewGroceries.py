@@ -1,7 +1,11 @@
 #! /usr/bin/env python2.7
 #Ryan Fu 2015
 from xlrd import open_workbook
-xls=open_workbook('groceries.xls')
+import sys
+excelFile=sys.argv[1]
+print excelFile
+
+xls=open_workbook(excelFile)
 for sheets in xls.sheets():
     lists=[[] for _ in xrange(100)]
     counter=0
