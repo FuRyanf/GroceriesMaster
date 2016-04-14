@@ -2,6 +2,8 @@ from subprocess import call
 import xlwt
 #run tesseract's OCR
 #ONLY FOR COSTCO formmat
+#todo
+#binarisation rotation and border removal
 def charIsNumber(s):
     try: 
         int(s)
@@ -9,7 +11,7 @@ def charIsNumber(s):
     except ValueError:
         return False
 
-call(["tesseract", "reciept2.png", "parsed"])
+call(["tesseract", "reciept4.png", "parsed"])
 f=open('parsed.txt')
 
 itemList=[]
@@ -28,11 +30,12 @@ for line in f:
 #additionally can implement regex
 numbers=['1','2','3','4','5','6','7','8','9','0','.']
 numbers2=['1','2','3','4','5','6','7','8','9','0']
+initVals=['1','2','3','4','5','6','7','8','9','0','E']
 mistake=[',','_','-']
 mistakeNum=['g']
 count = 0
 while count < len(parsingList):
-	if parsingList[count]=='' or parsingList[count][0] != 'E' or parsingList[count][0] not in numbers:
+	if parsingList[count]=='' or parsingList[count][0]!='E':
 		parsingList.pop(count)
 	else:
 		count+=1
@@ -63,12 +66,10 @@ for element in parsingList:
 	print price
 	print word
 	itemList.append(word)
-	priceList.append(price)
-	# try: 
- #    	priceList.append(float(price))
- #    	break
- #    except:
- #        priceList.append(price)
+	try: 
+		priceList.append(float(price))
+	except:
+		priceList.append(price)
 
 
 print parsingList
