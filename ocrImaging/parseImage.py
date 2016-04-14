@@ -3,35 +3,46 @@ import xlwt
 import re
 # run tesseract's OCR
 # Only tested with costco reciepts
-# assumptions and considerations
-# Each line has a period
-# binarisation gives 
+# assumptions and considerations:
+# 1.Each line has a period
+# 2.binarisation gives more exact numbers
+# 3.prioritize number accuracy over word accuracy, words just have to be decipherable
+# 4.assumes that users look over spreadsheat generated
 
 # border removal using numpy
 # regex format \w\s*(\d+)\s*(.+)\s*(\d+\.\d+) try on the non converted
 
-call(["tesseract", "hello.png", "parsed"])
+call(["tesseract", "reciept3.png", "parsed"])
 # binarisation rotation using ImageMagick helps with getting exact numbers
 call(["convert", "-colorspace", "gray", "-colors", "2", "-normalize", "reciept3.png", "reciept3conv.png"])
-call(["tesseract", "reciept3conv.png", "parsed2"])
+call(["tesseract", "reciept3conv.png", "parsed"])
 
 # to extract only numbers, start from last element until first period
 
 f=open('parsed.txt')
 
 itemList=[]
-priceList=[]
 parsingList = []
+priceList=[]
 for line in f:
+	line = line.replace(" ","")
+	line = line.strip()
 	if str(line[-1:]) == '\n' and '.' in line:
 		parsingList.append(line[:-1])
 		print line[:-1]
 	elif '.' in line:
 		parsingList.append(line)
 		#print line
+for parse in parsingList:
+	tempList=[s for s in re.findall(r'[0-9]+\.[0-9]{1,2}', parse)]
+	try:
+		priceList.append(tempList[-1])
+	except IndexError:
+		print "not valid"
+	
+print priceList
 
-print "+++++++++++++++"
-print parsingList[0]
+
 
 #f2=open('parsed2.txt')
 # itemList2=[]
