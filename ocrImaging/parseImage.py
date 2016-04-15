@@ -29,113 +29,71 @@ def removeUselessLines(lines):
 	for line in lines:
 		line = line.replace(" ","")
 		line = line.strip()
-		if str(line[-1:]) == '\n' and ('.' in line or '-' in line):
+		if str(line[-1:]) == '\n' and ('.' in line or '-' in line or '_' in line):
 			parsingList.append(line[:-1])
 			print line[:-1]
-		elif '.' in line:
+		elif ('.' in line or '-' in line or '_' in line):
 			parsingList.append(line)
 	return parsingList
 
 parsingListBin = removeUselessLines(f)
 parsingListNorm = removeUselessLines(g)
 
-listBin=[]
-countBin = 0
+listBin={}
+positionBin = 0
 for parse in parsingListBin:
-	#make the first number optional.
+	# make the first number optional.
 	tempList=[s for s in re.findall(r'[0-9]?[0-9]?[0-9]?[0-9]?[\.\-][0-9]{1,2}', parse)]
 	try:
-		#underscore?
 		tempList[-1]=tempList[-1].replace("-",".")
 		tempList[-1]=tempList[-1].replace("_",".")
-		listBin.append(tempList[-1])
-		countBin+=1
+		price=tempList[-1]
+		listBin[positionBin] = [price]
+		positionBin+=1
 	except IndexError:
 		print "not valid"
 
-listNorm=[]
-countNorm = 0
+listNorm={}
+positionNorm = 0
 for parse in parsingListNorm:
-	#make the first number optional.
+	# make the first number optional.
 	tempList=[s for s in re.findall(r'[0-9]?[0-9]?[0-9]?[0-9]?[\.\-][0-9]{1,2}', parse)]
 	try:
-		tupl = ()
 		tempList[-1]=tempList[-1].replace("-",".")
 		tempList[-1]=tempList[-1].replace("_",".")
-		listNorm.append(tempList[-1])
-		parse = parse[:len(parse)-len(tempList[-1])] #remove the price and everything after it from the line
-		countNorm+=1
+		price=tempList[-1]
+		parse = parse[:len(parse)-len(tempList[-1])] # remove the price and everything after it from the line
+		parse=filter(lambda x: x.isalpha(), parse)
+		if parse[0] =='E':
+			parse=parse[1:]
+		if len(parse)<2:
+			continue
+		grocItem = parse
+		listNorm[positionNorm]=[price,grocItem]
+		positionNorm+=1
 	except IndexError:
 		print "not valid"
 
 	
-print listBin
-print listNorm
+print listBin # form (price, position)
+print '\n'
+print '\n'
+print listNorm # form (price, item name, position)
 
-
-
-
-
-#f2=open('parsed2.txt')
-# itemList2=[]
-# priceList2=[]
-# parsingList2= []
-# for line in f2:
-# 	if str(line[-1:]) == '\n' and '.' in line:
-# 		parsingList2.append(line[:-1])
-# 		print line[:-1]
-# 	elif '.' in line:
-# 		parsingList2.append(line)
-# 		print line
-
-
-# #If item is not equal to E then gg
-# #additionally can implement regex
-# numbers=['1','2','3','4','5','6','7','8','9','0','.']
-# numbers2=['1','2','3','4','5','6','7','8','9','0']
-# initVals=['1','2','3','4','5','6','7','8','9','0','E']
-# mistake=[',','_','-']
-# mistakeNum=['g']
-# count = 0
-# while count < len(parsingList):
-# 	if parsingList[count]=='' or parsingList[count][0]!='E':
-# 		parsingList.pop(count)
-# 	else:
-# 		count+=1
-# for element in parsingList:
-# 	count = 1
-# 	word =""
-# 	while count < len(element) and element[count] in numbers or element[count]==' ':
-# 		count+=1
-
-# 	# print count
-# 	while count < len(element) and element[count] not in numbers2:
-# 		word+=element[count]
-# 		count+=1
-
-# 	price =""
-# 	while count < len(element):
-# 		if element[count] in mistake:
-# 			price+='.'
-# 		elif element[count] in mistakeNum:
-# 			price+='9'
-# 		elif element[count] in numbers:
-# 			price+=element[count]
-# 		elif element[count] == ' ':
-# 			print ""
+# split listNorm into two lists, ones with similar, ones without factor distance between positions
+# listNormSame =[]
+# listNormConflict = []
+# for tupl in listNorm:
+# 	for price in listBin:
+# 		if tupl[0] in price: # check if the price is in list of prices
+# 			listNormSame.append(tupl)
+# 			[]
 # 		else:
-# 			break
-# 		count+=1
-# 	print price
-# 	print word
-# 	itemList.append(word)
-# 	try: 
-# 		priceList.append(float(price))
-# 	except:
-# 		priceList.append(price)
+# 			listNormConflict
 
+# print listNormSame
+# print listNormConflict
 
-# print parsingList
 # print len(parsingList)
 
 
