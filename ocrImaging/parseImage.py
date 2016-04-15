@@ -4,18 +4,17 @@ import re
 # run tesseract's OCR
 # Only tested with costco reciepts
 # assumptions and considerations:
-# 1.Each line has a period
-# 2.binarisation gives more exact numbers
-# 3.prioritize number accuracy over word accuracy, words just have to be decipherable
-# 4.assumes that users look over spreadsheat generated
+# 1.binarisation gives more exact numbers
+# 2.prioritize number accuracy over word accuracy, words just have to be decipherable
+# 3.assumes that users look over spreadsheat generated
 
 # border removal using numpy
 # regex format \w\s*(\d+)\s*(.+)\s*(\d+\.\d+) try on the non converted
 
-call(["tesseract", "reciept3.png", "parsed"])
+call(["tesseract", "reciept3.png", "parsed2"])
 # binarisation rotation using ImageMagick helps with getting exact numbers
-call(["convert", "-colorspace", "gray", "-colors", "2", "-normalize", "reciept3.png", "reciept3conv.png"])
-call(["tesseract", "reciept3conv.png", "parsed"])
+#call(["convert", "-colorspace", "gray", "-colors", "2", "-normalize", "reciept3.png", "reciept3conv.png"])
+#call(["tesseract", "reciept3conv.png", "parsed"])
 
 # to extract only numbers, start from last element until first period
 
@@ -24,18 +23,21 @@ f=open('parsed.txt')
 itemList=[]
 parsingList = []
 priceList=[]
+# line may be redundant.
 for line in f:
 	line = line.replace(" ","")
 	line = line.strip()
-	if str(line[-1:]) == '\n' and '.' in line:
+	if str(line[-1:]) == '\n' and ('.' in line or '-' in line):
 		parsingList.append(line[:-1])
 		print line[:-1]
 	elif '.' in line:
 		parsingList.append(line)
-		#print line
+
 for parse in parsingList:
-	tempList=[s for s in re.findall(r'[0-9]+\.[0-9]{1,2}', parse)]
+	tempList=[s for s in re.findall(r'[0-9]+[\.\-][0-9]{1,2}', parse)]
 	try:
+		#underscore?
+		tempList[-1]=tempList[-1].replace("-",".")
 		priceList.append(tempList[-1])
 	except IndexError:
 		print "not valid"
