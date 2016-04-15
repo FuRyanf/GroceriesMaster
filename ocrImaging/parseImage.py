@@ -11,38 +11,68 @@ import re
 # border removal using numpy
 # regex format \w\s*(\d+)\s*(.+)\s*(\d+\.\d+) try on the non converted
 
-call(["tesseract", "reciept3.png", "parsed2"])
+# call(["tesseract", "reciept3.png", "parsedNorm"])
 # binarisation rotation using ImageMagick helps with getting exact numbers
-#call(["convert", "-colorspace", "gray", "-colors", "2", "-normalize", "reciept3.png", "reciept3conv.png"])
-#call(["tesseract", "reciept3conv.png", "parsed"])
+# call(["convert", "-colorspace", "gray", "-colors", "2", "-normalize", "reciept3.png", "reciept3conv.png"])
+# call(["tesseract", "reciept3conv.png", "parsedBin"])
 
 # to extract only numbers, start from last element until first period
 
-f=open('parsed.txt')
+f=open('parsedBin.txt')
+g=open('parsedNorm.txt')
+#put this in a seperate method
 
-itemList=[]
-parsingList = []
-priceList=[]
-# line may be redundant.
-for line in f:
-	line = line.replace(" ","")
-	line = line.strip()
-	if str(line[-1:]) == '\n' and ('.' in line or '-' in line):
-		parsingList.append(line[:-1])
-		print line[:-1]
-	elif '.' in line:
-		parsingList.append(line)
 
-for parse in parsingList:
-	tempList=[s for s in re.findall(r'[0-9]+[\.\-][0-9]{1,2}', parse)]
+
+def removeUselessLines(lines):
+	parsingList = []
+	for line in lines:
+		line = line.replace(" ","")
+		line = line.strip()
+		if str(line[-1:]) == '\n' and ('.' in line or '-' in line):
+			parsingList.append(line[:-1])
+			print line[:-1]
+		elif '.' in line:
+			parsingList.append(line)
+	return parsingList
+
+parsingListBin = removeUselessLines(f)
+parsingListNorm = removeUselessLines(g)
+
+listBin=[]
+countBin = 0
+for parse in parsingListBin:
+	#make the first number optional.
+	tempList=[s for s in re.findall(r'[0-9]?[0-9]?[0-9]?[0-9]?[\.\-][0-9]{1,2}', parse)]
 	try:
 		#underscore?
 		tempList[-1]=tempList[-1].replace("-",".")
-		priceList.append(tempList[-1])
+		tempList[-1]=tempList[-1].replace("_",".")
+		listBin.append(tempList[-1])
+		countBin+=1
 	except IndexError:
 		print "not valid"
+
+listNorm=[]
+countNorm = 0
+for parse in parsingListNorm:
+	#make the first number optional.
+	tempList=[s for s in re.findall(r'[0-9]?[0-9]?[0-9]?[0-9]?[\.\-][0-9]{1,2}', parse)]
+	try:
+		tupl = ()
+		tempList[-1]=tempList[-1].replace("-",".")
+		tempList[-1]=tempList[-1].replace("_",".")
+		listNorm.append(tempList[-1])
+		parse = parse[:len(parse)-len(tempList[-1])] #remove the price and everything after it from the line
+		countNorm+=1
+	except IndexError:
+		print "not valid"
+
 	
-print priceList
+print listBin
+print listNorm
+
+
 
 
 
