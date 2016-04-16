@@ -11,10 +11,10 @@ import re
 # border removal using numpy
 # regex format \w\s*(\d+)\s*(.+)\s*(\d+\.\d+) try on the non converted
 
-# call(["tesseract", "reciept3.png", "parsedNorm"])
-# binarisation rotation using ImageMagick helps with getting exact numbers
-# call(["convert", "-colorspace", "gray", "-colors", "2", "-normalize", "reciept3.png", "reciept3conv.png"])
-# call(["tesseract", "reciept3conv.png", "parsedBin"])
+#call(["tesseract", "test.jpg", "parsedNorm"])
+#binarisation rotation using ImageMagick helps with getting exact numbers
+#call(["convert", "-colorspace", "gray", "-colors", "2", "-normalize", "test.jpg", "testconv.png"])
+#call(["tesseract", "testconv.png", "parsedBin"])
 
 # to extract only numbers, start from last element until first period
 
@@ -39,7 +39,7 @@ def removeUselessLines(lines):
 parsingListBin = removeUselessLines(f)
 parsingListNorm = removeUselessLines(g)
 
-listBin={}
+dictBin={}
 positionBin = 0
 for parse in parsingListBin:
 	# make the first number optional.
@@ -48,12 +48,12 @@ for parse in parsingListBin:
 		tempList[-1]=tempList[-1].replace("-",".")
 		tempList[-1]=tempList[-1].replace("_",".")
 		price=tempList[-1]
-		listBin[positionBin] = [price]
+		dictBin[positionBin] = float(price)
 		positionBin+=1
 	except IndexError:
 		print "not valid"
 
-listNorm={}
+dictNorm={}
 positionNorm = 0
 for parse in parsingListNorm:
 	# make the first number optional.
@@ -69,30 +69,44 @@ for parse in parsingListNorm:
 		if len(parse)<2:
 			continue
 		grocItem = parse
-		listNorm[positionNorm]=[price,grocItem]
+		dictNorm[positionNorm]=[float(price),grocItem]
 		positionNorm+=1
 	except IndexError:
 		print "not valid"
 
 	
-print listBin # form (price, position)
+print dictBin # form {position: price}
+print len(dictBin)
 print '\n'
 print '\n'
-print listNorm # form (price, item name, position)
+print dictNorm # form {position: [price, item]}
 
 # split listNorm into two lists, ones with similar, ones without factor distance between positions
-# listNormSame =[]
-# listNormConflict = []
-# for tupl in listNorm:
-# 	for price in listBin:
-# 		if tupl[0] in price: # check if the price is in list of prices
-# 			listNormSame.append(tupl)
-# 			[]
-# 		else:
-# 			listNormConflict
+dictNormSame ={}
+dictNormConflict = {}
+for keyNorm, value in dictNorm.iteritems():
+	if value[0] in dictBin.values(): # if price in dictNorm is in the prices in dictBin
+		index = dictBin.keys()[dictBin.values().index(value[0])]#find key where value lies
+		dictNormSame[keyNorm] = [dictBin.pop(index), value[1]]
+	else:
+		dictNormConflict[keyNorm]=value
 
-# print listNormSame
-# print listNormConflict
+print '\n'
+print '\n'
+print "Same"
+print dictNormSame
+print '\n'
+print '\n'
+print "Different"
+print dictNormConflict
+print '\n'
+print '\n'
+print "Leftover"
+print dictBin
+print len(dictBin)
+print len(dictNormConflict)
+
+
 
 # print len(parsingList)
 
