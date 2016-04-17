@@ -1,6 +1,10 @@
 from subprocess import call
 import xlwt
 import re
+# Things it doesn't cover:
+# 1. coupons
+# 2. tax
+# 3. covers items up to 99.99
 # run tesseract's OCR
 # Only tested with costco reciepts
 # assumptions and considerations:
@@ -11,10 +15,10 @@ import re
 # border removal using numpy
 # regex format \w\s*(\d+)\s*(.+)\s*(\d+\.\d+) try on the non converted
 
-#call(["tesseract", "test.jpg", "parsedNorm"])
+#call(["tesseract", "hand.png", "parsedNorm"])
 #binarisation rotation using ImageMagick helps with getting exact numbers
-#call(["convert", "-colorspace", "gray", "-colors", "2", "-normalize", "test.jpg", "testconv.png"])
-#call(["tesseract", "testconv.png", "parsedBin"])
+#call(["convert", "-colorspace", "gray", "-colors", "2", "-normalize", "hand.png", "handconv.png"])
+#call(["tesseract", "handconv.png", "parsedBin"])
 
 # to extract only numbers, start from last element until first period
 
@@ -27,7 +31,7 @@ g=open('parsedNorm.txt')
 def removeUselessLines(lines):
 	parsingList = []
 	for line in lines:
-		line = line.replace(" ","")
+		#line = line.replace(" ","")
 		line = line.strip()
 		if str(line[-1:]) == '\n' and ('.' in line or '-' in line or '_' in line):
 			parsingList.append(line[:-1])
@@ -43,7 +47,7 @@ dictBin={}
 positionBin = 0
 for parse in parsingListBin:
 	# make the first number optional.
-	tempList=[s for s in re.findall(r'[0-9]?[0-9]?[0-9]?[0-9]?[\.\-][0-9]{1,2}', parse)]
+	tempList=[s for s in re.findall(r'[0-9]?[0-9]?[0-9]?[\.\-][0-9]{1,2}', parse)]
 	try:
 		tempList[-1]=tempList[-1].replace("-",".")
 		tempList[-1]=tempList[-1].replace("_",".")
@@ -55,10 +59,14 @@ for parse in parsingListBin:
 
 dictNorm={}
 positionNorm = 0
+prevDictKey=0
 for parse in parsingListNorm:
 	# make the first number optional.
-	tempList=[s for s in re.findall(r'[0-9]?[0-9]?[0-9]?[0-9]?[\.\-][0-9]{1,2}', parse)]
+	tempList=[s for s in re.findall(r'[0-9]?[0-9]?[0-9]?[\.\-][0-9]{1,2}', parse)]
 	try:
+		if parse[-1] == '-' and len(tempList)!= 0 and ('C' in parse or 'P' in parse or 'N' in parse): #in the case that it is a coupon
+			dictNorm[int(prevDictKey)][0]-=float(tempList[-1])
+			continue
 		tempList[-1]=tempList[-1].replace("-",".")
 		tempList[-1]=tempList[-1].replace("_",".")
 		price=tempList[-1]
@@ -70,6 +78,7 @@ for parse in parsingListNorm:
 			continue
 		grocItem = parse
 		dictNorm[positionNorm]=[float(price),grocItem]
+		prevDictKey = positionNorm
 		positionNorm+=1
 	except IndexError:
 		print "not valid"
@@ -106,22 +115,28 @@ print dictBin
 print len(dictBin)
 print len(dictNormConflict)
 
+# Algorithm for leftovers. Based on two criteria, similarity and position, pair up choose the smaller value
+# in that case, those without pair remain itself.
+# apply Levenshtein distance App
 
 
 # print len(parsingList)
 
 
 
-# book = xlwt.Workbook(encoding="utf-8")
-# sheet1 = book.add_sheet("Sheet 1")
-# names=["Ryan","Leonard","Alex","Henry","Colin","Alvin"]
-# for x,name in enumerate(names):
-# 	sheet1.write(0, 2+x, name)
+book = xlwt.Workbook(encoding="utf-8")
+sheet1 = book.add_sheet("Sheet 1")
+names=["Ryan","Leonard","Alex","Henry","Colin","Alvin"]
+for x,name in enumerate(names):
+	sheet1.write(0, 2+x, name)
 # for x,name in enumerate(itemList):
 # 	sheet1.write(1+x, 0, name)
-# for x,name in enumerate(priceList):
 # 	sheet1.write(1+x, 1, name)	
+for x,value in enumerate(dictNorm.values()):
+	sheet1.write(1+x, 0, value[1])
+	sheet1.write(1+x, 1, value[0])	
+	
 
 
 
-# book.save("trial.xls")
+book.save("trial.xls")
