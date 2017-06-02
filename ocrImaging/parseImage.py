@@ -16,7 +16,7 @@ import re
 # border removal using numpy
 # regex format \w\s*(\d+)\s*(.+)\s*(\d+\.\d+) try on the non converted
 
-call(["tesseract", "reciept3.png", "parsedNorm"])
+call(["tesseract", "c1.jpeg", "parsedNorm"])
 # binarisation rotation using ImageMagick helps with getting exact numbers
 # call(["convert", "-colorspace", "gray", "-colors", "2", "-normalize", "hand.png", "handconv.png"])
 # call(["tesseract", "handconv.png", "parsedBin"])
@@ -137,7 +137,7 @@ for parse in parsingListNorm:
 
 book = xlwt.Workbook(encoding="utf-8")
 sheet1 = book.add_sheet("Sheet 1")
-names=["Ryan","Leonard","Alex","Henry","Colin","Alvin"]
+names=["Andy","John","Ryan","Mathew","Evans","Tim"]
 for x,name in enumerate(names):
 	sheet1.write(0, 2+x, name)
 for x,value in enumerate(dictNorm.values()):
